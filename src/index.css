@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@100..900&display=swap');
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-primary: #064e3b; /* Deep Emerald Green */
+  --color-secondary: #b45309; /* Warm Bronze/Gold */
+  --color-accent: #f59e0b; /* Bright Gold */
+  --color-ambient: #fdfcf9; /* Ambient Off-white */
+}
+
+@layer base {
+  body {
+    @apply font-sans text-gray-900 bg-ambient transition-colors duration-300;
+    background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.traditional-border {
+  border: 2px solid theme('colors.secondary');
+  padding: 1rem;
+  position: relative;
+}
+
+.traditional-border::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px solid theme('colors.secondary');
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ornate-corner {
+  position: relative;
+}
+
+.ornate-corner::after {
+  content: '✦';
+  position: absolute;
+  color: theme('colors.secondary');
+  font-size: 1.5rem;
+}
+
+.top-left::after { top: -10px; left: -10px; }
+.top-right::after { top: -10px; right: -10px; }
+.bottom-left::after { bottom: -10px; left: -10px; }
+.bottom-right::after { bottom: -10px; right: -10px; }
+
+.islamic-pattern {
+  position: relative;
+}
+
+.islamic-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/arabesque.png");
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.dark body {
+  @apply bg-slate-950 text-slate-100;
+  background-image: none;
+}
