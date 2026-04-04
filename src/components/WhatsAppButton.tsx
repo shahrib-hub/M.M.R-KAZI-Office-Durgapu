@@ -1,4 +1,4 @@
-import { MessageCircle, Instagram, Facebook } from 'lucide-react';
+import { MessageCircle, Instagram, Facebook, Phone } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function FloatingButtons() {
@@ -8,6 +8,19 @@ export default function FloatingButtons() {
 
   return (
     <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4">
+      <motion.a
+        href={`tel:+${phoneNumber}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="bg-blue-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center"
+        aria-label="Call us"
+      >
+        <Phone className="w-8 h-8" />
+      </motion.a>
       <motion.a
         href={whatsappUrl}
         target="_blank"

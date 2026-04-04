@@ -86,7 +86,7 @@ export default function About() {
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg border-l-4 border-secondary">
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Location</p>
-                  <p className="font-bold text-primary dark:text-white">Durgapur City Centre (District No. 18)</p>
+                  <p className="font-bold text-primary dark:text-white">Durgapur City Centre</p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-slate-900 rounded-lg border-l-4 border-secondary">
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Sanad No</p>
