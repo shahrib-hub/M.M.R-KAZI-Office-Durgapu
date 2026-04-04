@@ -29,7 +29,7 @@ export default function About() {
               <div className="traditional-border bg-white dark:bg-slate-900 ornate-corner top-left top-right bottom-left bottom-right">
                 <div className="aspect-[4/5] overflow-hidden shadow-xl">
                   <img 
-                    src="https://i.ibb.co/zhtRN6np/IMG-20251015-132821-jpg.jpg" 
+                    src="https://ik.imagekit.io/ramwfilij/IMG_20251015_132821.jpg.jpeg" 
                     alt="Tousif Ahamed" 
                     className="w-full h-full object-cover transition-all duration-700"
                     referrerPolicy="no-referrer"
@@ -47,7 +47,7 @@ export default function About() {
               <div className="traditional-border bg-white dark:bg-slate-900 ornate-corner top-left top-right bottom-left bottom-right">
                 <div className="aspect-[4/5] overflow-hidden shadow-xl">
                   <img 
-                    src="https://i.ibb.co/MkYckcNN/2205-removebg-preview.png" 
+                    src="https://ik.imagekit.io/ramwfilij/2205-removebg-preview.png" 
                     alt="Sk Md Rafique" 
                     className="w-full h-full object-cover transition-all duration-700"
                     referrerPolicy="no-referrer"

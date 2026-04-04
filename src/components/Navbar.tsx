@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Menu, 
   X, 
@@ -32,6 +32,16 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
     document.documentElement.classList.toggle('dark');
   };
 
+  const handleScrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const targetId = href.replace('#', '');
+    const elem = document.getElementById(targetId);
+    if (elem) {
+      elem.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsOpen(false);
+  };
+
   const navLinks = [
     { name: 'Home', href: '#home', icon: Home },
     { name: 'Services', href: '#services', icon: Briefcase },
@@ -62,6 +72,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
               <a
                 key={link.name}
                 href={link.href}
+                onClick={(e) => handleScrollToSection(e, link.href)}
                 className="text-gray-700 dark:text-gray-200 hover:text-primary dark:hover:text-accent font-medium transition-colors"
               >
                 {link.name}
@@ -117,7 +128,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => handleScrollToSection(e, link.href)}
                   className="flex items-center gap-3 px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-md"
                 >
                   <link.icon className="w-5 h-5 text-primary dark:text-accent" />

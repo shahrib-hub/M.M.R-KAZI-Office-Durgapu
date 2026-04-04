@@ -1,3 +1,5 @@
+import { Instagram, Facebook } from 'lucide-react';
+
 export default function Footer() {
   return (
     <footer className="bg-primary dark:bg-slate-950 text-white py-16 islamic-pattern border-t-4 border-secondary">
@@ -22,8 +24,12 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center w-full gap-6 text-sm text-emerald-100/50">
             <p>© 2024 M.M.R & KAZI Office Durgapur</p>
             <div className="flex gap-6">
-              <a href="https://www.instagram.com/kazi_office_durgapur" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
-              <a href="https://www.facebook.com/share/1Z6huK8cgx/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Facebook</a>
+              <a href="https://www.instagram.com/kazi_office_durgapur" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" aria-label="Instagram">
+                <Instagram className="w-5 h-5" />
+              </a>
+              <a href="https://www.facebook.com/share/1Z6huK8cgx/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors" aria-label="Facebook">
+                <Facebook className="w-5 h-5" />
+              </a>
             </div>
             <p>Authorized by MMR West Bengal</p>
           </div>
