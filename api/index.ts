@@ -2,7 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
-import { connectDB, User } from "../src/lib/db";
+import { connectDB, User } from "../src/lib/db.js";
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-kazi-key";
