@@ -7,7 +7,7 @@ export default function FloatingButtons() {
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-4">
+    <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-50 flex flex-col gap-3 md:gap-4">
       <motion.a
         href={`tel:+${phoneNumber}`}
         target="_blank"
@@ -16,10 +16,10 @@ export default function FloatingButtons() {
         animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="bg-blue-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center"
+        className="bg-blue-600 text-white p-3 md:p-4 rounded-full shadow-2xl flex items-center justify-center"
         aria-label="Call us"
       >
-        <Phone className="w-8 h-8" />
+        <Phone className="w-6 h-6 md:w-8 md:h-8" />
       </motion.a>
       <motion.a
         href={whatsappUrl}
@@ -29,10 +29,10 @@ export default function FloatingButtons() {
         animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="bg-[#25D366] text-white p-4 rounded-full shadow-2xl flex items-center justify-center"
+        className="bg-[#25D366] text-white p-3 md:p-4 rounded-full shadow-2xl flex items-center justify-center"
         aria-label="Chat on WhatsApp"
       >
-        <MessageCircle className="w-8 h-8" />
+        <MessageCircle className="w-6 h-6 md:w-8 md:h-8" />
       </motion.a>
       <motion.a
         href="https://www.instagram.com/kazi_office_durgapur"
@@ -42,10 +42,10 @@ export default function FloatingButtons() {
         animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 text-white p-4 rounded-full shadow-2xl flex items-center justify-center"
+        className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 text-white p-3 md:p-4 rounded-full shadow-2xl flex items-center justify-center"
         aria-label="Instagram"
       >
-        <Instagram className="w-8 h-8" />
+        <Instagram className="w-6 h-6 md:w-8 md:h-8" />
       </motion.a>
       <motion.a
         href="https://www.facebook.com/share/1Z6huK8cgx/"
@@ -55,10 +55,10 @@ export default function FloatingButtons() {
         animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="bg-[#1877F2] text-white p-4 rounded-full shadow-2xl flex items-center justify-center"
+        className="bg-[#1877F2] text-white p-3 md:p-4 rounded-full shadow-2xl flex items-center justify-center"
         aria-label="Facebook"
       >
-        <Facebook className="w-8 h-8" />
+        <Facebook className="w-6 h-6 md:w-8 md:h-8" />
       </motion.a>
     </div>
   );

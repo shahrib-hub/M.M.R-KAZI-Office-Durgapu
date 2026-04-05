@@ -62,7 +62,7 @@ export default function Navbar({ onAuthClick }: NavbarProps) {
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="flex items-center gap-3">
-            <div className="h-20 md:h-28 flex items-center py-2">
+            <div className="h-12 sm:h-16 md:h-28 flex items-center py-2">
               <img 
                 src="https://i.ibb.co/KjJSFyzK/Airbrush-BG-CHANGER-1775314610814.png" 
                 alt="Muhammadan Marriage And Divorce Registrar & Kazi" 

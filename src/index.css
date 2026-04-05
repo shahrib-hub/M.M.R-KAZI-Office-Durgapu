@@ -16,6 +16,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    @apply overflow-x-hidden;
   }
   
   section {
@@ -23,7 +24,7 @@
   }
 
   body {
-    @apply font-sans text-gray-900 bg-ambient transition-colors duration-300;
+    @apply font-sans text-gray-900 bg-ambient transition-colors duration-300 overflow-x-hidden;
     background-image: url("https://www.transparenttextures.com/patterns/paper.png");
   }
   

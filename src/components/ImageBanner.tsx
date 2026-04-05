@@ -10,16 +10,13 @@ const images = [
 ];
 
 export default function ImageBanner() {
-  // Duplicate images for seamless loop
-  const duplicatedImages = [...images, ...images];
-
   return (
     <div className="w-full overflow-hidden bg-ambient dark:bg-slate-950 py-10 border-y border-secondary/10">
-      <div className="relative flex px-3">
+      <div className="relative flex">
         <motion.div
-          className="flex gap-6 pr-6"
+          className="flex w-max"
           animate={{
-            x: ['-50%', 0],
+            x: ['0%', '-50%'],
           }}
           transition={{
             duration: 40,
@@ -27,20 +24,38 @@ export default function ImageBanner() {
             repeat: Infinity,
           }}
         >
-          {duplicatedImages.map((src, index) => (
-            <div
-              key={index}
-              className="relative flex-shrink-0 w-72 h-48 md:w-96 md:h-64 rounded-2xl overflow-hidden shadow-lg border-2 border-primary/5 group"
-            >
-              <img
-                src={src}
-                alt={`Service Showcase ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </div>
-          ))}
+          <div className="flex gap-6 pr-6">
+            {images.map((src, index) => (
+              <div
+                key={`set1-${index}`}
+                className="relative flex-shrink-0 w-72 h-48 md:w-96 md:h-64 rounded-2xl overflow-hidden shadow-lg border-2 border-primary/5 group"
+              >
+                <img
+                  src={src}
+                  alt={`Service Showcase ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-6 pr-6">
+            {images.map((src, index) => (
+              <div
+                key={`set2-${index}`}
+                className="relative flex-shrink-0 w-72 h-48 md:w-96 md:h-64 rounded-2xl overflow-hidden shadow-lg border-2 border-primary/5 group"
+              >
+                <img
+                  src={src}
+                  alt={`Service Showcase ${index + 1}`}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </div>

@@ -8,7 +8,7 @@ interface HeroProps {
 
 export default function Hero({ onAuthClick }: HeroProps) {
   return (
-    <section id="home" className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section id="home" className="relative min-h-screen flex flex-col justify-center pt-20 overflow-hidden">
       {/* Background with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -20,7 +20,7 @@ export default function Hero({ onAuthClick }: HeroProps) {
         <div className="absolute inset-0 bg-gradient-to-b from-ambient via-ambient/80 to-ambient dark:from-slate-950 dark:via-slate-950/80 dark:to-slate-950" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         <div className="text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -66,11 +66,16 @@ export default function Hero({ onAuthClick }: HeroProps) {
                 Our Services
               </a>
             </div>
-            <div className="mt-8">
-              <ImageBanner />
-            </div>
           </motion.div>
+        </div>
+      </div>
 
+      <div className="w-full relative z-10 mt-16">
+        <ImageBanner />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+        <div className="text-center">
           {/* Feature highlights */}
           <motion.div 
             initial={{ opacity: 0, y: 40 }}
