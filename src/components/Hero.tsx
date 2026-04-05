@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { ScrollText, Heart, ShieldCheck } from 'lucide-react';
+import ImageBanner from './ImageBanner';
 
 interface HeroProps {
   onAuthClick: () => void;
@@ -64,6 +65,9 @@ export default function Hero({ onAuthClick }: HeroProps) {
               >
                 Our Services
               </a>
+            </div>
+            <div className="mt-8">
+              <ImageBanner />
             </div>
           </motion.div>
 

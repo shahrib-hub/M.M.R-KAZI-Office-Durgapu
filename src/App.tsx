@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ImageBanner from './components/ImageBanner';
 import About from './components/About';
 import Services from './components/Services';
 import Appointment from './components/Appointment';
@@ -21,7 +20,6 @@ export default function App() {
       
       <main>
         <Hero onAuthClick={toggleAuth} />
-        <ImageBanner />
         <About />
         <Services />
         <Appointment />
