@@ -1,20 +1,23 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Muhammadan Marriage & Divorce Registrar — Admin (MongoDB-only File Storage)
 
-# Run and deploy your AI Studio app
+This version stores uploaded files in MongoDB GridFS (no filesystem writes), which fixes Vercel `EROFS` errors.
 
-This contains everything you need to run your app locally.
+## Current test flow
 
-View your app in AI Studio: https://ai.studio/apps/9c7ea21b-ca6b-4afe-b0fb-05d72c577c0d
+- Manual DOCX template upload to MongoDB GridFS.
+- Optional **test placeholder schema** toggle during template upload.
+- Dynamic form generation from stored schema.
+- Generate filled DOCX and store generated file in MongoDB GridFS.
+- Manual PDF upload to MongoDB GridFS.
 
-## Run Locally
+## Key locations
 
-**Prerequisites:**  Node.js
+- `api/index.ts` -> auth + templates + documents + manual-pdf APIs
+- `src/services/mongoFileService.ts` -> GridFS upload/download service
+- `src/lib/db.ts` -> Mongo models
+- `src/services/templateEngineService.ts` -> DOCX parse/render
+- `src/web/admin/` -> dedicated admin workspace UI
 
+## Why this fixes your issue
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Vercel serverless runtime has read-only app filesystem (`/var/task`). This implementation writes files to MongoDB GridFS instead of any local path.
