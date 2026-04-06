@@ -1,6 +1,5 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
 import fs from "fs/promises";
 import path from "path";
@@ -39,7 +38,6 @@ function requireAuth(req: express.Request, res: express.Response, next: express.
 
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
