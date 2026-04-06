@@ -20,8 +20,7 @@ interface Template {
 interface GeneratedDocument {
   _id: string;
   templateName: string;
-  docxUrl: string;
-  pdfUrl?: string;
+  pdfUrl: string;
   createdAt: string;
 }
 
@@ -134,7 +133,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || "Generation failed");
 
-      setMessage("DOCX generated successfully.");
+      setMessage("Document generated successfully.");
       setFieldValues({});
       await loadData();
     } catch (error: any) {
@@ -248,7 +247,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
             onClick={handleGenerate}
             className="rounded-lg bg-blue-700 px-5 py-2 text-white hover:bg-blue-800 disabled:opacity-60"
           >
-            {loading ? "Processing..." : "Generate DOCX"}
+            {loading ? "Processing..." : "Generate DOCX + PDF"}
           </button>
         </section>
 
@@ -269,13 +268,8 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                     <td className="py-3 pr-4 font-medium"><FileText className="inline w-4 h-4 mr-1" /> {doc.templateName}</td>
                     <td className="py-3 pr-4">{new Date(doc.createdAt).toLocaleString()}</td>
                     <td className="py-3 space-x-2">
-                      {doc.pdfUrl ? (
-                        <>
-                          <a href={doc.pdfUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-3 py-1 hover:bg-slate-200"><Eye className="w-4 h-4" /> PDF Preview</a>
-                          <a href={doc.pdfUrl} download className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-3 py-1 text-emerald-800 hover:bg-emerald-200"><Download className="w-4 h-4" /> PDF</a>
-                        </>
-                      ) : null}
-                      <a href={doc.docxUrl} download className="inline-flex items-center gap-1 rounded-md bg-blue-100 px-3 py-1 text-blue-800 hover:bg-blue-200"><Download className="w-4 h-4" /> DOCX</a>
+                      <a href={doc.pdfUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-3 py-1 hover:bg-slate-200"><Eye className="w-4 h-4" /> Preview</a>
+                      <a href={doc.pdfUrl} download className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-3 py-1 text-emerald-800 hover:bg-emerald-200"><Download className="w-4 h-4" /> Download</a>
                     </td>
                   </tr>
                 ))}

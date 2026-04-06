@@ -41,9 +41,8 @@ const generatedDocumentSchema = new mongoose.Schema(
     templateName: { type: String, required: true },
     payload: { type: Object, required: true },
     docxPath: { type: String, required: true },
-    pdfPath: { type: String, default: "" },
-    pdfUrl: { type: String, default: "" },
-    docxUrl: { type: String, required: true }
+    pdfPath: { type: String, required: true },
+    pdfUrl: { type: String, required: true }
   },
   { timestamps: true }
 );

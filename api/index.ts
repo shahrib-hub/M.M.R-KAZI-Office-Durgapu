@@ -6,6 +6,7 @@ import fs from "fs/promises";
 import path from "path";
 import { connectDB, GeneratedDocument, Template, User } from "../src/lib/db.js";
 import { analyzeTemplateFromBuffer, renderDocxFromBuffer } from "../src/services/templateEngineService.js";
+import { convertDocxToPdfViaCloudConvert } from "../src/services/pdfConversionService.js";
 import { readFileBuffer, resolveStoragePath, saveBase64File } from "../src/services/storageService.js";
 
 const app = express();
@@ -161,21 +162,28 @@ app.post("/api/documents/generate", requireAuth, async (req, res) => {
       suggestedName: `${template.name}-filled`
     });
 
+    const pdfBuffer = await convertDocxToPdfViaCloudConvert({
+      docxBuffer: renderedDocxBuffer,
+      filename: `${template.name}.docx`
+    });
+
+    const pdfSaved = await saveBase64File({
+      base64: pdfBuffer.toString("base64"),
+      kind: "generated-pdfs",
+      mimeType: "application/pdf",
+      suggestedName: `${template.name}-generated`
+    });
+
     const generated = await GeneratedDocument.create({
       templateId: template._id,
       templateName: template.name,
       payload,
       docxPath: docxSaved.relativePath,
-      docxUrl: docxSaved.publicUrl,
-      pdfPath: "",
-      pdfUrl: ""
+      pdfPath: pdfSaved.relativePath,
+      pdfUrl: pdfSaved.publicUrl
     });
 
-    res.json({
-      document: generated,
-      docxUrl: docxSaved.publicUrl,
-      message: "DOCX generated successfully. Upload PDF manually if needed."
-    });
+    res.json({ document: generated, pdfUrl: pdfSaved.publicUrl, previewUrl: pdfSaved.publicUrl });
   } catch (error: any) {
     res.status(500).json({ message: error.message || "Document generation failed" });
   }
