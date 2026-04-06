@@ -34,12 +34,31 @@ const templateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const manualPdfSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    fileId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    mimeType: { type: String, default: "application/pdf" },
-    uploadedBy: { type: String, required: true }
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: "admin" }
+  },
+  { timestamps: true }
+);
+
+const templateSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    storagePath: { type: String, required: true },
+    storageUrl: { type: String, required: true },
+    schema: [
+      {
+        key: { type: String, required: true },
+        type: { type: String, enum: ["text", "image", "date", "number"], required: true },
+        label: { type: String, required: true },
+        required: { type: Boolean, default: true }
+      }
+    ],
+    status: { type: String, enum: ["active", "archived"], default: "active" },
+    createdBy: { type: String, required: true }
   },
   { timestamps: true }
 );
@@ -49,8 +68,9 @@ const generatedDocumentSchema = new mongoose.Schema(
     templateId: { type: mongoose.Schema.Types.ObjectId, ref: "Template", required: true },
     templateName: { type: String, required: true },
     payload: { type: Object, required: true },
-    fileId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    docxMimeType: { type: String, default: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }
+    docxPath: { type: String, required: true },
+    pdfPath: { type: String, required: true },
+    pdfUrl: { type: String, required: true }
   },
   { timestamps: true }
 );
@@ -64,7 +84,6 @@ interface IUser {
 
 export const User = (mongoose.models.User as mongoose.Model<IUser>) || mongoose.model<IUser>("User", userSchema);
 export const Template = (mongoose.models.Template as mongoose.Model<any>) || mongoose.model("Template", templateSchema);
-export const ManualPdf = (mongoose.models.ManualPdf as mongoose.Model<any>) || mongoose.model("ManualPdf", manualPdfSchema);
 export const GeneratedDocument =
   (mongoose.models.GeneratedDocument as mongoose.Model<any>) || mongoose.model("GeneratedDocument", generatedDocumentSchema);
 
