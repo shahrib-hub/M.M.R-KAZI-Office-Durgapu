@@ -21,8 +21,46 @@ interface IUser {
   role: string;
 }
 
+const templateSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  data: { type: String, required: true }, // Base64 encoded docx file
+  createdAt: { type: Date, default: Date.now }
+});
+
+export interface ITemplate {
+  name: string;
+  data: string;
+  createdAt: Date;
+}
+
+const appointmentSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  phone: { type: String, required: true },
+  service: { type: String, required: true },
+  date: { type: String, required: true },
+  time: { type: String, required: true },
+  message: { type: String },
+  status: { type: String, default: 'Pending' },
+  isRead: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
+
+export interface IAppointment {
+  name: string;
+  phone: string;
+  service: string;
+  date: string;
+  time: string;
+  message?: string;
+  status: string;
+  isRead: boolean;
+  createdAt: Date;
+}
+
 // Use existing model if it exists to avoid overwrite errors
 export const User = (mongoose.models.User as mongoose.Model<IUser>) || mongoose.model<IUser>("User", userSchema);
+export const Template = (mongoose.models.Template as mongoose.Model<ITemplate>) || mongoose.model<ITemplate>("Template", templateSchema);
+export const Appointment = (mongoose.models.Appointment as mongoose.Model<IAppointment>) || mongoose.model<IAppointment>("Appointment", appointmentSchema);
 
 // Predefined Admins
 const ADMINS = [

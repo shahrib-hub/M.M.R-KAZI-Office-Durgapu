@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -13,12 +14,12 @@ import AdminPanel from './components/AdminPanel';
 export default function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is already logged in
-    fetch('/api/me')
+    fetch('/api/me', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.user) {
@@ -38,9 +39,9 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
       setUser(null);
-      setShowAdminPanel(false);
+      navigate('/');
     } catch (err) {
       console.error('Logout failed');
     }
@@ -54,42 +55,48 @@ export default function App() {
     );
   }
 
-  if (showAdminPanel && user) {
-    return (
-      <AdminPanel 
-        user={user} 
-        onLogout={handleLogout} 
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen font-sans selection:bg-primary selection:text-white">
-      <Navbar 
-        onAuthClick={toggleAuth} 
-        isAdmin={!!user}
-        onAdminPanelClick={() => setShowAdminPanel(true)}
-        onLogout={handleLogout}
-      />
-      
-      <main>
-        <Hero onAuthClick={toggleAuth} />
-        <About />
-        <Services />
-        <Appointment />
-        <Contact />
-      </main>
+    <Routes>
+      <Route path="/" element={
+        <div className="min-h-screen font-sans selection:bg-primary selection:text-white">
+          <Navbar 
+            onAuthClick={toggleAuth} 
+            isAdmin={!!user}
+            onAdminPanelClick={() => navigate('/admin')}
+            onLogout={handleLogout}
+          />
+          
+          <main>
+            <Hero onAuthClick={toggleAuth} />
+            <About />
+            <Services />
+            <Appointment />
+            <Contact />
+          </main>
 
-      <Footer />
+          <Footer />
+          
+          <FloatingButtons />
+          
+          <AuthModal 
+            isOpen={isAuthOpen} 
+            onClose={() => setIsAuthOpen(false)} 
+            onLoginSuccess={handleLoginSuccess}
+          />
+        </div>
+      } />
       
-      <FloatingButtons />
-      
-      <AuthModal 
-        isOpen={isAuthOpen} 
-        onClose={() => setIsAuthOpen(false)} 
-        onLoginSuccess={handleLoginSuccess}
-      />
-    </div>
+      <Route path="/admin/*" element={
+        user ? (
+          <AdminPanel 
+            user={user} 
+            onLogout={handleLogout} 
+          />
+        ) : (
+          <Navigate to="/" replace />
+        )
+      } />
+    </Routes>
   );
 }
 
