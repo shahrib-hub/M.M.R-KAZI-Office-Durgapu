@@ -1,20 +1,22 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Muhammadan Marriage & Divorce Registrar — Admin (MongoDB-first Test Flow)
 
-# Run and deploy your AI Studio app
+Current implementation is simplified for testing on Vercel constraints:
 
-This contains everything you need to run your app locally.
+- Manual DOCX template upload to **MongoDB** (base64 stored in DB).
+- Optional **test placeholder schema** toggle during upload.
+- Dynamic form generation from stored schema.
+- Generate filled DOCX and save generated output in MongoDB.
+- Manual PDF upload to MongoDB (not backend filesystem).
 
-View your app in AI Studio: https://ai.studio/apps/9c7ea21b-ca6b-4afe-b0fb-05d72c577c0d
+## API modules
 
-## Run Locally
+- `api/index.ts` -> auth + templates + documents + manual-pdf APIs
+- `src/lib/db.ts` -> Mongo models (`Template`, `GeneratedDocument`, `ManualPdf`)
+- `src/services/templateEngineService.ts` -> DOCX placeholder parse/render logic
+- `src/web/admin/` -> dedicated admin web workspace UI
 
-**Prerequisites:**  Node.js
+## Notes
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- No local `storage/` bucket dependency is used anymore.
+- Files are served directly from MongoDB-backed APIs.
+- `useTestPlaceholders` is available for testing until all templates are uploaded and verified.
