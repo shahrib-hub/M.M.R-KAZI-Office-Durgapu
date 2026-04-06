@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Muhammadan Marriage & Divorce Registrar — Production Admin Automation
 
-# Run and deploy your AI Studio app
+This project now includes a production-ready admin document automation workflow:
 
-This contains everything you need to run your app locally.
+- Upload DOCX templates with `{{placeholder}}` fields.
+- Auto-detect required fields and infer input types.
+- Generate dynamic forms from template schema.
+- Fill DOCX templates from admin input.
+- Generate filled DOCX files directly from templates (no third-party conversion dependency).
+- Store generated DOCX output with optional manual PDF upload support.
+- Upload manual PDFs into backend folder (`storage/manual-pdf-uploads`).
 
-View your app in AI Studio: https://ai.studio/apps/9c7ea21b-ca6b-4afe-b0fb-05d72c577c0d
+## Architecture
 
-## Run Locally
+- `api/` → Auth + template/document API endpoints
+- `src/lib/` → DB + placeholder/schema logic
+- `src/services/` → template rendering and storage services
+- `src/components/` → production admin UI
 
-**Prerequisites:**  Node.js
-
+## Setup
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+2. Configure environment in `.env` using `.env.example`:
+   - `MONGODB_URI`
+   - `JWT_SECRET`
+3. Run locally:
+   ```bash
+   npm run dev
+   ```
+
+## Important Notes
+
+- Placeholder mapping is **only** placeholder-driven (`{{field_key}}`), no hardcoded coordinates.
+- Image placeholders are validated and stored, then mapped from placeholder keys during render.
