@@ -2,9 +2,6 @@ import app from "./api/index.js";
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 const PORT = 3000;
 
