@@ -1,39 +1,20 @@
-# Muhammadan Marriage & Divorce Registrar — Production Admin Automation
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-This project now includes a production-ready admin document automation workflow:
+# Run and deploy your AI Studio app
 
-- Upload DOCX templates with `{{placeholder}}` fields.
-- Auto-detect required fields and infer input types.
-- Generate dynamic forms from template schema.
-- Fill DOCX templates from admin input.
-- Convert DOCX to PDF via CloudConvert API (Vercel-compatible).
-- Store and preview generated PDFs.
-- Upload manual PDFs into backend folder (`storage/manual-pdf-uploads`).
+This contains everything you need to run your app locally.
 
-## Architecture
+View your app in AI Studio: https://ai.studio/apps/9c7ea21b-ca6b-4afe-b0fb-05d72c577c0d
 
-- `api/` → Auth + template/document API endpoints
-- `src/lib/` → DB + placeholder/schema logic
-- `src/services/` → template rendering, conversion, storage services
-- `src/components/` → production admin UI
+## Run Locally
 
-## Setup
+**Prerequisites:**  Node.js
+
 
 1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Configure environment in `.env` using `.env.example`:
-   - `MONGODB_URI`
-   - `JWT_SECRET`
-   - `CLOUDCONVERT_API_KEY`
-3. Run locally:
-   ```bash
-   npm run dev
-   ```
-
-## Important Notes
-
-- Placeholder mapping is **only** placeholder-driven (`{{field_key}}`), no hardcoded coordinates.
-- Image placeholders are currently validated and stored; fill output uses text replacement strategy suitable for URL/path insertion.
-- For production image embedding in DOCX, connect `docxtemplater + image module` in `src/services/templateEngineService.ts`.
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
