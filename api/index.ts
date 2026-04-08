@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import bcrypt from "bcryptjs";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
+import ImageModule from "docxtemplater-image-module-free";
+import sizeOf from "image-size";
 import rateLimit from "express-rate-limit";
 import { connectDB, User, Template, Appointment } from "../src/lib/db.js";
 
@@ -128,6 +130,24 @@ app.get("/api/templates", async (req, res) => {
   }
 });
 
+// Delete template
+app.delete("/api/templates/:id", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.role !== "admin") return res.status(403).json({ message: "Not authorized" });
+
+    const template = await Template.findByIdAndDelete(req.params.id);
+    if (!template) return res.status(404).json({ message: "Template not found" });
+
+    res.json({ message: "Template deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Generate document from template
 app.post("/api/templates/:id/generate", async (req, res) => {
   const token = req.cookies.token;
@@ -144,9 +164,55 @@ app.post("/api/templates/:id/generate", async (req, res) => {
     const content = Buffer.from(base64Data, "base64");
 
     const zip = new PizZip(content);
+    
+    // Configure Image Module
+    const imageOptions = {
+      centered: false,
+      getImage: function(tagValue: string, tagName: string) {
+        // tagValue is the base64 string from the frontend
+        if (tagValue && tagValue.startsWith('data:image/')) {
+          const base64Data = tagValue.replace(/^data:image\/\w+;base64,/, '');
+          return Buffer.from(base64Data, 'base64');
+        }
+        // Return a 1x1 transparent pixel if no image is provided to avoid errors
+        return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+      },
+      getSize: function(img: any, tagValue: string, tagName: string) {
+        try {
+          // Get original image dimensions
+          const dimensions = sizeOf(img);
+          const originalWidth = dimensions.width || 150;
+          const originalHeight = dimensions.height || 150;
+          
+          let maxWidth = 150;
+          let maxHeight = 150;
+
+          if (tagName === 'photo') {
+            maxWidth = 150;
+            maxHeight = 150;
+          } else if (tagName === 'signature') {
+            maxWidth = 350; // Increased size
+            maxHeight = 120; // Increased size
+          }
+
+          // Calculate aspect ratio to fit perfectly without distortion or cropping
+          const ratio = Math.min(maxWidth / originalWidth, maxHeight / originalHeight);
+          
+          return [Math.round(originalWidth * ratio), Math.round(originalHeight * ratio)];
+        } catch (e) {
+          console.error("Error getting image size:", e);
+          if (tagName === 'signature') return [350, 120];
+          return [150, 150];
+        }
+      }
+    };
+    
+    const imageModule = new ImageModule(imageOptions);
+
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      modules: [imageModule],
       delimiters: {
         start: '{{',
         end: '}}'

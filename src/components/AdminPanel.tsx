@@ -22,7 +22,8 @@ import {
   Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import DocumentGenerator from './DocumentGenerator';
+import Notice1Generator from './Notice1Generator';
+import SettingsComponent from './Settings';
 
 interface AdminPanelProps {
   user: { name: string; email: string };
@@ -44,6 +45,9 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
     'Notification' in window ? Notification.permission : 'denied'
   );
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains('dark'));
+
+  const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<string | null>(null);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -121,16 +125,18 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
     }
   };
 
-  const deleteAppointment = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this appointment?")) return;
+  const confirmDeleteAppointment = async () => {
+    if (!appointmentToDelete) return;
     try {
-      await fetch(`/api/appointments/${id}`, {
+      await fetch(`/api/appointments/${appointmentToDelete}`, {
         method: 'DELETE',
         credentials: 'include'
       });
       fetchAppointments();
     } catch (error) {
       console.error('Failed to delete appointment:', error);
+    } finally {
+      setAppointmentToDelete(null);
     }
   };
 
@@ -199,6 +205,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
               onClick={() => {
                 navigate(`/admin/${item.id}`);
                 setIsMobileMenuOpen(false);
+                if (item.id !== 'documents') setSelectedDocument(null);
               }}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
                 activeTab === item.id 
@@ -529,7 +536,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                                   </button>
                                 )}
                                 <button 
-                                  onClick={() => deleteAppointment(app._id)}
+                                  onClick={() => setAppointmentToDelete(app._id)}
                                   className="text-gray-400 hover:text-red-500 transition-colors"
                                   title="Delete Appointment"
                                 >
@@ -547,11 +554,45 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
             )}
 
             {activeTab === 'documents' && (
-              <DocumentGenerator />
+              <div className="space-y-6">
+                {!selectedDocument ? (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Available Documents</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                      {/* Notice 1 Tile */}
+                      <div 
+                        onClick={() => setSelectedDocument('notice1')}
+                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-6 cursor-pointer hover:shadow-md hover:border-primary dark:hover:border-primary transition-all group"
+                      >
+                        <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Notice 1</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Generate Talaqu-e-Hassan / Aahsan notice document.</p>
+                      </div>
+                      {/* Add more tiles here in the future */}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <button 
+                      onClick={() => setSelectedDocument(null)}
+                      className="mb-4 flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-1" /> Back to Documents
+                    </button>
+                    {selectedDocument === 'notice1' && <Notice1Generator />}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <SettingsComponent />
             )}
             
             {/* Other tabs can go here */}
-            {['registrations', 'users', 'settings'].includes(activeTab) && (
+            {['registrations', 'users'].includes(activeTab) && (
               <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6 flex items-center justify-center h-64 transition-colors">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">This section is under construction.</p>
               </div>
@@ -559,6 +600,35 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
           </div>
         </div>
       </main>
+
+      {/* Delete Appointment Confirmation Modal */}
+      {appointmentToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+            <div className="flex items-center gap-3 text-red-600 dark:text-red-400 mb-4">
+              <Trash2 className="w-6 h-6" />
+              <h3 className="text-lg font-bold">Confirm Deletion</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to delete this appointment? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setAppointmentToDelete(null)}
+                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDeleteAppointment}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
