@@ -61,8 +61,44 @@ export default function Notice1Generator() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64Data = event.target?.result as string;
-      setFormData({ ...formData, [fieldName]: base64Data });
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Compress large images to prevent Vercel 4.5MB payload limit errors
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round(height * (MAX_WIDTH / width));
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round(width * (MAX_HEIGHT / height));
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          // Fill white background in case of transparent PNGs being converted to JPEG
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+        
+        // Compress to JPEG with 0.7 quality to drastically reduce base64 string size
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        setFormData({ ...formData, [fieldName]: compressedBase64 });
+      };
+      img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
