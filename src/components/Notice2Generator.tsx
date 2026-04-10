@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Download, Loader2, AlertCircle } from 'lucide-react';
+import FormField from './FormField';
 
 interface Template {
   _id: string;
@@ -28,7 +29,17 @@ export default function Notice2Generator() {
     signature: ''
   });
 
+  const [underlines, setUnderlines] = useState<Record<string, boolean>>({});
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const toggleUnderline = (name: string) => {
+    setUnderlines(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const applyUnderline = (text: string) => {
+    if (!text) return text;
+    return `__UNDERLINE_START__${text}__UNDERLINE_END__`;
+  };
 
   useEffect(() => {
     fetchTemplates();
@@ -125,12 +136,18 @@ export default function Notice2Generator() {
     setGenerating(true);
     setMessage(null);
     try {
-      const payloadData = {
+      const payloadData: Record<string, any> = {
         ...formData,
         date: formatDate(formData.date),
         date1: formatDate(formData.date1),
         date2: formatDate(formData.date2)
       };
+
+      for (const key in payloadData) {
+        if (underlines[key] && typeof payloadData[key] === 'string' && !payloadData[key].startsWith('data:image')) {
+          payloadData[key] = applyUnderline(payloadData[key]);
+        }
+      }
 
       const res = await fetch(`/api/templates/${templateId}/generate`, {
         method: 'POST',
@@ -194,64 +211,28 @@ export default function Notice2Generator() {
 
       <form onSubmit={handleGenerate} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Police Station</label>
-            <input type="text" name="police_station" value={formData.police_station} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">District</label>
-            <input type="text" name="district" value={formData.district} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
+          <FormField label="Police Station" name="police_station" value={formData.police_station} onChange={handleInputChange} isUnderlined={underlines.police_station} onToggleUnderline={toggleUnderline} />
+          <FormField label="District" name="district" value={formData.district} onChange={handleInputChange} isUnderlined={underlines.district} onToggleUnderline={toggleUnderline} />
           
           <div className="md:col-span-2 mt-4"><h4 className="font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-1">First Party Details</h4></div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-            <input type="text" name="firstparty_name" value={formData.firstparty_name} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Father's Name</label>
-            <input type="text" name="firstparty_father_name" value={formData.firstparty_father_name} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
-            <textarea name="firstparty_address" value={formData.firstparty_address} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" rows={2} required />
-          </div>
+          <FormField label="Name" name="firstparty_name" value={formData.firstparty_name} onChange={handleInputChange} isUnderlined={underlines.firstparty_name} onToggleUnderline={toggleUnderline} />
+          <FormField label="Father's Name" name="firstparty_father_name" value={formData.firstparty_father_name} onChange={handleInputChange} isUnderlined={underlines.firstparty_father_name} onToggleUnderline={toggleUnderline} />
+          <FormField label="Address" name="firstparty_address" value={formData.firstparty_address} onChange={handleInputChange} isUnderlined={underlines.firstparty_address} onToggleUnderline={toggleUnderline} isTextArea />
 
           <div className="md:col-span-2 mt-4"><h4 className="font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-1">Second Party Details</h4></div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-            <input type="text" name="secondparty_name" value={formData.secondparty_name} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Father's Name</label>
-            <input type="text" name="secondparty_father_name" value={formData.secondparty_father_name} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
-            <textarea name="secondparty_address" value={formData.secondparty_address} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" rows={2} required />
-          </div>
+          <FormField label="Name" name="secondparty_name" value={formData.secondparty_name} onChange={handleInputChange} isUnderlined={underlines.secondparty_name} onToggleUnderline={toggleUnderline} />
+          <FormField label="Father's Name" name="secondparty_father_name" value={formData.secondparty_father_name} onChange={handleInputChange} isUnderlined={underlines.secondparty_father_name} onToggleUnderline={toggleUnderline} />
+          <FormField label="Address" name="secondparty_address" value={formData.secondparty_address} onChange={handleInputChange} isUnderlined={underlines.secondparty_address} onToggleUnderline={toggleUnderline} isTextArea />
 
           <div className="md:col-span-2 mt-4"><h4 className="font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-1">Other Details</h4></div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Notice</label>
-            <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Husband's Name</label>
-            <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Application (date1)</label>
-            <input type="date" name="date1" value={formData.date1} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of 1st Talaque Notice (date2)</label>
-            <input type="date" name="date2" value={formData.date2} onChange={handleInputChange} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
-          </div>
+          <FormField label="Date of Notice" name="date" type="date" value={formData.date} onChange={handleInputChange} isUnderlined={underlines.date} onToggleUnderline={toggleUnderline} />
+          <FormField label="Husband's Name" name="name" value={formData.name} onChange={handleInputChange} isUnderlined={underlines.name} onToggleUnderline={toggleUnderline} />
+          <FormField label="Date of Application (date1)" name="date1" type="date" value={formData.date1} onChange={handleInputChange} isUnderlined={underlines.date1} onToggleUnderline={toggleUnderline} />
+          <FormField label="Date of 1st Talaque Notice (date2)" name="date2" type="date" value={formData.date2} onChange={handleInputChange} isUnderlined={underlines.date2} onToggleUnderline={toggleUnderline} />
 
           <div className="md:col-span-2 mt-4"><h4 className="font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-slate-700 pb-1">Images</h4></div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Photo (Max 150x150)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Photo (Max 300x300)</label>
             <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'photo')} className="w-full p-2 border border-gray-300 dark:border-slate-700 rounded bg-white dark:bg-slate-800 text-gray-900 dark:text-white" required />
             {formData.photo && <span className="text-xs text-emerald-600 mt-1 block">Photo uploaded</span>}
           </div>

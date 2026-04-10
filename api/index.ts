@@ -188,8 +188,8 @@ app.post("/api/templates/:id/generate", async (req, res) => {
           let maxHeight = 150;
 
           if (tagName === 'photo') {
-            maxWidth = 150;
-            maxHeight = 150;
+            maxWidth = 300;
+            maxHeight = 300;
           } else if (tagName === 'signature') {
             maxWidth = 350; // Increased size
             maxHeight = 120; // Increased size
@@ -222,7 +222,40 @@ app.post("/api/templates/:id/generate", async (req, res) => {
     // Render the document
     doc.render(data);
 
-    const buf = doc.getZip().generate({
+    let zip2 = doc.getZip();
+    
+    // Post-process to apply native Word underlines
+    const filesToProcess = Object.keys(zip2.files).filter(fileName => 
+      fileName === "word/document.xml" || 
+      fileName.startsWith("word/header") || 
+      fileName.startsWith("word/footer")
+    );
+
+    for (const fileName of filesToProcess) {
+      let xmlContent = zip2.file(fileName).asText();
+      if (xmlContent.includes('__UNDERLINE_START__')) {
+        xmlContent = xmlContent.replace(/<w:r[ >][\s\S]*?<\/w:r>/g, function(runXml) {
+          if (!runXml.includes('__UNDERLINE_START__')) return runXml;
+          
+          let rPrMatch = runXml.match(/<w:rPr>[\s\S]*?<\/w:rPr>/);
+          let rPr = rPrMatch ? rPrMatch[0] : '';
+          
+          let underlinedRPr = rPr ? rPr.replace('</w:rPr>', '<w:u w:val="single"/></w:rPr>') : '<w:rPr><w:u w:val="single"/></w:rPr>';
+
+          return runXml.replace(/__UNDERLINE_START__([\s\S]*?)__UNDERLINE_END__/g, function(match, text) {
+              return `</w:t></w:r><w:r>${underlinedRPr}<w:t xml:space="preserve">${text}</w:t></w:r><w:r>${rPr}<w:t xml:space="preserve">`;
+          });
+        });
+        
+        // Clean up empty text nodes to keep XML clean
+        xmlContent = xmlContent.replace(/<w:t xml:space="preserve"><\/w:t>/g, '');
+        xmlContent = xmlContent.replace(/<w:t><\/w:t>/g, '');
+        
+        zip2.file(fileName, xmlContent);
+      }
+    }
+
+    const buf = zip2.generate({
       type: "nodebuffer",
       compression: "DEFLATE",
     });

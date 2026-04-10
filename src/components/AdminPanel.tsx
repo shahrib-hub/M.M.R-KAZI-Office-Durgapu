@@ -24,6 +24,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Notice1Generator from './Notice1Generator';
 import Notice2Generator from './Notice2Generator';
+import DivorceCertificateGenerator from './DivorceCertificateGenerator';
 import SettingsComponent from './Settings';
 
 interface AdminPanelProps {
@@ -583,6 +584,18 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                         <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Notice 2</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Generate 2nd Talaque notice document.</p>
                       </div>
+
+                      {/* Divorce Certificate Tile */}
+                      <div 
+                        onClick={() => setSelectedDocument('divorce_certificate')}
+                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-6 cursor-pointer hover:shadow-md hover:border-primary dark:hover:border-primary transition-all group"
+                      >
+                        <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Divorce Certificate</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Generate Divorce Registration Certificate.</p>
+                      </div>
                       {/* Add more tiles here in the future */}
                     </div>
                   </div>
@@ -596,6 +609,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                     </button>
                     {selectedDocument === 'notice1' && <Notice1Generator />}
                     {selectedDocument === 'notice2' && <Notice2Generator />}
+                    {selectedDocument === 'divorce_certificate' && <DivorceCertificateGenerator />}
                   </div>
                 )}
               </div>
