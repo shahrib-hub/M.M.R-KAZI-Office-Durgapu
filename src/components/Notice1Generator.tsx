@@ -140,8 +140,16 @@ export default function Notice1Generator() {
       };
 
       for (const key in payloadData) {
-        if (underlines[key] && typeof payloadData[key] === 'string' && !payloadData[key].startsWith('data:image')) {
-          payloadData[key] = applyUnderline(payloadData[key]);
+        if (typeof payloadData[key] === 'string' && !payloadData[key].startsWith('data:image')) {
+          let val = payloadData[key].trim();
+          // Remove accidental newlines from single-line fields
+          if (!key.includes('address') && !key.includes('condition')) {
+            val = val.replace(/[\r\n]+/g, ' ');
+          }
+          if (underlines[key]) {
+            val = applyUnderline(val);
+          }
+          payloadData[key] = val;
         }
       }
 

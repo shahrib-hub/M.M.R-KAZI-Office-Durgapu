@@ -7,7 +7,7 @@ import Docxtemplater from "docxtemplater";
 import ImageModule from "docxtemplater-image-module-free";
 import sizeOf from "image-size";
 import rateLimit from "express-rate-limit";
-import { connectDB, User, Template, Appointment } from "../src/lib/db.js";
+import { connectDB, User, Template, Appointment, Log } from "../src/lib/db.js";
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "super-secret-kazi-key";
@@ -240,7 +240,14 @@ app.post("/api/templates/:id/generate", async (req, res) => {
           let rPrMatch = runXml.match(/<w:rPr>[\s\S]*?<\/w:rPr>/);
           let rPr = rPrMatch ? rPrMatch[0] : '';
           
-          let underlinedRPr = rPr ? rPr.replace('</w:rPr>', '<w:u w:val="single"/></w:rPr>') : '<w:rPr><w:u w:val="single"/></w:rPr>';
+          let underlinedRPr = rPr;
+          if (underlinedRPr) {
+            if (!underlinedRPr.includes('<w:u ')) {
+              underlinedRPr = underlinedRPr.replace('</w:rPr>', '<w:u w:val="single"/></w:rPr>');
+            }
+          } else {
+            underlinedRPr = '<w:rPr><w:u w:val="single"/></w:rPr>';
+          }
 
           return runXml.replace(/__UNDERLINE_START__([\s\S]*?)__UNDERLINE_END__/g, function(match, text) {
               return `</w:t></w:r><w:r>${underlinedRPr}<w:t xml:space="preserve">${text}</w:t></w:r><w:r>${rPr}<w:t xml:space="preserve">`;
@@ -259,6 +266,24 @@ app.post("/api/templates/:id/generate", async (req, res) => {
       type: "nodebuffer",
       compression: "DEFLATE",
     });
+
+    // Auto-log the generation
+    try {
+      const logData = { ...data };
+      // Remove large base64 images from the log
+      for (const key in logData) {
+        if (typeof logData[key] === 'string' && logData[key].startsWith('data:image')) {
+          logData[key] = '[Image Data]';
+        }
+      }
+      await Log.create({
+        type: 'Generated Document',
+        documentType: template.name.replace('.docx', '').replace(/_/g, ' ').toUpperCase(),
+        data: logData
+      });
+    } catch (logErr) {
+      console.error("Failed to auto-log document generation:", logErr);
+    }
 
     res.setHeader("Content-Disposition", `attachment; filename=generated_${template.name}.docx`);
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
@@ -375,6 +400,61 @@ app.delete("/api/appointments/:id", async (req, res) => {
     if (!appointment) return res.status(404).json({ message: "Appointment not found" });
 
     res.json({ message: "Appointment deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// --- Log Routes ---
+
+// Get all logs (Admin only)
+app.get("/api/logs", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.role !== "admin") return res.status(403).json({ message: "Not authorized" });
+
+    const logs = await Log.find().sort({ createdAt: -1 });
+    res.json({ logs });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Create a manual log (Admin only)
+app.post("/api/logs", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.role !== "admin") return res.status(403).json({ message: "Not authorized" });
+
+    const { type, data, date, time } = req.body;
+    if (!type || !data) return res.status(400).json({ message: "Type and data are required" });
+
+    const log = await Log.create({ type, data, date, time });
+    res.status(201).json({ message: "Log created successfully", log });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a log (Admin only)
+app.delete("/api/logs/:id", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    if (decoded.role !== "admin") return res.status(403).json({ message: "Not authorized" });
+
+    const log = await Log.findByIdAndDelete(req.params.id);
+    if (!log) return res.status(404).json({ message: "Log not found" });
+
+    res.json({ message: "Log deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }

@@ -24,8 +24,10 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Notice1Generator from './Notice1Generator';
 import Notice2Generator from './Notice2Generator';
+import Notice3Generator from './Notice3Generator';
 import DivorceCertificateGenerator from './DivorceCertificateGenerator';
 import SettingsComponent from './Settings';
+import Registrations from './Registrations';
 
 interface AdminPanelProps {
   user: { name: string; email: string };
@@ -42,6 +44,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(
     'Notification' in window ? Notification.permission : 'denied'
@@ -56,11 +59,15 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
     document.documentElement.classList.toggle('dark');
   };
 
-  const fetchAppointments = async () => {
+  const fetchAppointmentsAndLogs = async () => {
     try {
-      const res = await fetch('/api/appointments', { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
+      const [aptRes, logsRes] = await Promise.all([
+        fetch('/api/appointments', { credentials: 'include' }),
+        fetch('/api/logs', { credentials: 'include' })
+      ]);
+
+      if (aptRes.ok) {
+        const data = await aptRes.json();
         
         // Check for new unread appointments to trigger browser notification
         if (notificationPermission === 'granted') {
@@ -71,22 +78,27 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
             const latest = newUnread[0];
             new Notification('New Appointment Request', {
               body: `${latest.name} requested a ${latest.service} appointment.`,
-              icon: '/favicon.ico' // Assuming there's a favicon
+              icon: '/favicon.ico'
             });
           }
         }
         
         setAppointments(data.appointments);
       }
+
+      if (logsRes.ok) {
+        const data = await logsRes.json();
+        setLogs(data.logs);
+      }
     } catch (error) {
-      console.error('Failed to fetch appointments:', error);
+      console.error('Failed to fetch data:', error);
     }
   };
 
   useEffect(() => {
-    fetchAppointments();
+    fetchAppointmentsAndLogs();
     // Poll every 15 seconds
-    const interval = setInterval(fetchAppointments, 15000);
+    const interval = setInterval(fetchAppointmentsAndLogs, 15000);
     return () => clearInterval(interval);
   }, [notificationPermission, appointments]); // Re-run if permission changes
 
@@ -134,7 +146,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
         method: 'DELETE',
         credentials: 'include'
       });
-      fetchAppointments();
+      fetchAppointmentsAndLogs();
     } catch (error) {
       console.error('Failed to delete appointment:', error);
     } finally {
@@ -143,18 +155,31 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
   };
 
   const stats = [
-    { label: 'Total Registrations', value: '1,284', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Total Registrations', value: logs.length.toString(), icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Pending Appointments', value: appointments.filter(a => a.status === 'Pending').length.toString(), icon: Calendar, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Active Users', value: '456', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Active Users', value: '2', icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { label: 'System Health', value: 'Optimal', icon: ShieldCheck, color: 'text-purple-600', bg: 'bg-purple-50' },
   ];
 
+  // Combine logs and appointments for recent activities
   const recentActivities = [
-    { id: 1, type: 'Marriage', name: 'Ahmed & Fatima', date: '2024-03-20', status: 'Completed' },
-    { id: 2, type: 'Divorce', name: 'Zaid & Sarah', date: '2024-03-18', status: 'Pending' },
-    { id: 3, type: 'Consultation', name: 'Omar Khan', date: '2024-03-15', status: 'In Progress' },
-    { id: 4, type: 'Marriage', name: 'Yusuf & Maryam', date: '2024-03-12', status: 'Completed' },
-  ];
+    ...logs.map(log => ({
+      id: log._id,
+      type: log.type,
+      name: log.data?.name || log.data?.firstparty_name || log.data?.hb_name || 'Document Generated',
+      date: log.date || new Date(log.createdAt).toLocaleDateString(),
+      status: 'Completed',
+      timestamp: new Date(log.createdAt).getTime()
+    })),
+    ...appointments.map(app => ({
+      id: app._id,
+      type: 'Appointment',
+      name: app.name,
+      date: new Date(app.createdAt).toLocaleDateString(),
+      status: app.status,
+      timestamp: new Date(app.createdAt).getTime()
+    }))
+  ].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex transition-colors duration-200">
@@ -351,7 +376,10 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
                     <p className="text-gray-500 dark:text-gray-400">Welcome back! Here's what's happening today.</p>
                   </div>
-                  <button className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-900 transition-colors shadow-sm">
+                  <button 
+                    onClick={() => navigate('/admin/registrations')}
+                    className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-900 transition-colors shadow-sm"
+                  >
                     <Plus className="w-4 h-4" />
                     New Registration
                   </button>
@@ -585,6 +613,18 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                         <p className="text-sm text-gray-500 dark:text-gray-400">Generate 2nd Talaque notice document.</p>
                       </div>
 
+                      {/* Notice 3 Tile */}
+                      <div 
+                        onClick={() => setSelectedDocument('notice3')}
+                        className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-6 cursor-pointer hover:shadow-md hover:border-primary dark:hover:border-primary transition-all group"
+                      >
+                        <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">Notice 3</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Generate 3rd Talaque notice document.</p>
+                      </div>
+
                       {/* Divorce Certificate Tile */}
                       <div 
                         onClick={() => setSelectedDocument('divorce_certificate')}
@@ -609,10 +649,15 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
                     </button>
                     {selectedDocument === 'notice1' && <Notice1Generator />}
                     {selectedDocument === 'notice2' && <Notice2Generator />}
+                    {selectedDocument === 'notice3' && <Notice3Generator />}
                     {selectedDocument === 'divorce_certificate' && <DivorceCertificateGenerator />}
                   </div>
                 )}
               </div>
+            )}
+
+            {activeTab === 'registrations' && (
+              <Registrations />
             )}
 
             {activeTab === 'settings' && (
@@ -620,7 +665,7 @@ export default function AdminPanel({ user, onLogout }: AdminPanelProps) {
             )}
             
             {/* Other tabs can go here */}
-            {['registrations', 'users'].includes(activeTab) && (
+            {['users'].includes(activeTab) && (
               <div className="bg-white dark:bg-slate-900 rounded-lg shadow-md p-6 flex items-center justify-center h-64 transition-colors">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">This section is under construction.</p>
               </div>

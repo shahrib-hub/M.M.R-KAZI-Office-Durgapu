@@ -57,10 +57,29 @@ export interface IAppointment {
   createdAt: Date;
 }
 
+const logSchema = new mongoose.Schema({
+  type: { type: String, required: true },
+  documentType: { type: String },
+  data: { type: mongoose.Schema.Types.Mixed, required: true },
+  date: { type: String },
+  time: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+export interface ILog {
+  type: string;
+  documentType?: string;
+  data: any;
+  date?: string;
+  time?: string;
+  createdAt: Date;
+}
+
 // Use existing model if it exists to avoid overwrite errors
 export const User = (mongoose.models.User as mongoose.Model<IUser>) || mongoose.model<IUser>("User", userSchema);
 export const Template = (mongoose.models.Template as mongoose.Model<ITemplate>) || mongoose.model<ITemplate>("Template", templateSchema);
 export const Appointment = (mongoose.models.Appointment as mongoose.Model<IAppointment>) || mongoose.model<IAppointment>("Appointment", appointmentSchema);
+export const Log = (mongoose.models.Log as mongoose.Model<ILog>) || mongoose.model<ILog>("Log", logSchema);
 
 // Predefined Admins
 const ADMINS = [
